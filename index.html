@@ -12,10 +12,11 @@
             box-sizing: border-box;
             height: 100%;
             font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #fdfbfb, #ebedee);
             display: flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, #fdfbfb, #ebedee);
+            flex-direction: column;
             overflow: hidden;
         }
 
@@ -28,6 +29,7 @@
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
             max-width: 600px;
             animation: fadeIn 2s ease-in-out;
+            margin-bottom: 20px;
         }
 
         .verse-container:hover {
@@ -55,30 +57,49 @@
             color: #6b4e71;
         }
 
-        /* Highlighted Words */
         .highlight {
             font-weight: bold;
-            transition: color 0.3s;
         }
 
-        a.read-more {
+        .chapter-container {
+            display: none;
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            max-width: 700px;
+            overflow-y: auto;
+            max-height: 400px;
+        }
+
+        .chapter-container h2 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            color: #6b4e71;
+        }
+
+        .chapter-container p {
+            font-size: 1rem;
+            color: #333;
+        }
+
+        .show-chapter {
             display: inline-block;
             margin-top: 20px;
             font-size: 1.2rem;
-            color: #6b4e71;
-            text-decoration: none;
-            border: 1px solid #6b4e71;
-            padding: 8px 15px;
-            border-radius: 5px;
-            transition: all 0.3s;
-        }
-
-        a.read-more:hover {
+            color: #fff;
             background: #6b4e71;
-            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
         }
 
-        /* Animations */
+        .show-chapter:hover {
+            background: #5a3d5a;
+        }
+
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -90,19 +111,13 @@
             }
         }
 
-        /* Responsiveness */
         @media (max-width: 768px) {
             h1 {
                 font-size: 2rem;
             }
+
             p {
                 font-size: 1.2rem;
-            }
-            strong {
-                font-size: 1.4rem;
-            }
-            a.read-more {
-                font-size: 1rem;
             }
         }
     </style>
@@ -114,45 +129,50 @@
             <strong id="verseReference">Loading verse...</strong><br>
             <span id="verseText">Please wait...</span>
         </p>
-        <a id="readMore" class="read-more" href="#" target="_blank" style="display: none;">Read More</a>
+        <button class="show-chapter" id="showChapterBtn">Read Full Chapter</button>
+    </div>
+
+    <div class="chapter-container" id="chapterContainer">
+        <h2 id="chapterTitle">Full Chapter</h2>
+        <p id="chapterText">Loading full chapter...</p>
     </div>
 
     <script>
-        // Function to fetch a Bible verse from the API
-        async function fetchVerse() {
-            try {
-                const date = new Date();
-                const day = date.getDate(); // Use the day of the month to fetch a unique verse
-                const chapter = 35; // Static chapter for now
-                const response = await fetch(`https://bible-api.com/Exodus%20${chapter}:${day}?translation=kjv`);
-                
-                if (!response.ok) throw new Error("Failed to fetch the verse");
+        async function fetchVerseAndChapter() {
+            const date = new Date();
+            const day = date.getDate(); // Day of the month
+            const chapter = 35; // Static chapter (Exodus 35 for this example)
 
-                const data = await response.json();
+            // Fetch the daily verse
+            const verseResponse = await fetch(`https://bible-api.com/Exodus%20${chapter}:${day}?translation=kjv`);
+            const verseData = await verseResponse.json();
 
-                const verseReference = data.reference;
-                const verseText = data.text;
+            // Display the daily verse
+            const verseReference = verseData.reference;
+            const verseText = verseData.text.replace(
+                /(wisdom|understanding|knowledge)/gi,
+                match => `<span class="highlight">${match}</span>`
+            );
+            document.getElementById('verseReference').textContent = verseReference;
+            document.getElementById('verseText').innerHTML = verseText;
 
-                // Update the verse content on the page
-                document.getElementById('verseReference').textContent = verseReference;
-                document.getElementById('verseText').innerHTML = verseText.replace(
-                    /(wisdom|understanding|knowledge)/gi,
-                    match => `<span class="highlight">${match}</span>`
-                );
+            // Prepare to fetch the full chapter
+            const chapterResponse = await fetch(`https://bible-api.com/Exodus%20${chapter}?translation=kjv`);
+            const chapterData = await chapterResponse.json();
 
-                // Update "Read More" link
-                const readMoreLink = document.getElementById('readMore');
-                readMoreLink.href = `https://www.biblegateway.com/passage/?search=${encodeURIComponent(verseReference)}`;
-                readMoreLink.style.display = "inline-block"; // Show the "Read More" button
-            } catch (error) {
-                console.error("Error fetching verse:", error);
-                document.getElementById('verseReference').textContent = "Error loading verse";
-                document.getElementById('verseText').textContent = "Please try again later.";
-            }
+            // Display the full chapter
+            document.getElementById('chapterTitle').textContent = chapterData.reference;
+            document.getElementById('chapterText').textContent = chapterData.text;
         }
 
-        // Fetch a verse when the page loads
-        fetchVerse();
+        // Show or hide the full chapter
+        document.getElementById('showChapterBtn').addEventListener('click', () => {
+            const chapterContainer = document.getElementById('chapterContainer');
+            chapterContainer.style.display = chapterContainer.style.display === 'block' ? 'none' : 'block';
+        });
+
+        // Fetch verse and chapter on load
+        fetchVerseAndChapter();
     </script>
 </body>
 </html>
