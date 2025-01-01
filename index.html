@@ -16,25 +16,48 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            flex-direction: column;
             overflow: hidden;
         }
 
         /* Container Styles */
-        .verse-container {
-            text-align: center;
+        .container {
+            width: 100%;
+            max-width: 800px;
+            height: 100%;
+            position: relative;
+        }
+
+        .verse-container, .chapter-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             background: white;
             padding: 40px;
             border-radius: 15px;
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
-            max-width: 600px;
-            animation: fadeIn 2s ease-in-out;
-            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            overflow: hidden;
+            transition: transform 0.6s ease-in-out;
         }
 
-        .verse-container:hover {
-            transform: scale(1.02);
-            transition: transform 0.3s;
+        .verse-container {
+            z-index: 2;
+            transform: translateY(0);
+        }
+
+        .chapter-container {
+            z-index: 1;
+            transform: translateY(100%);
+        }
+
+        .hidden {
+            transform: translateY(-100%);
         }
 
         h1 {
@@ -59,35 +82,13 @@
 
         .highlight {
             font-weight: bold;
+            color: #d9534f;
         }
 
-        .chapter-container {
-            display: none;
-            background: #fff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            max-width: 700px;
-            overflow-y: auto;
-            max-height: 400px;
-        }
-
-        .chapter-container h2 {
-            font-size: 1.8rem;
-            margin-bottom: 10px;
-            color: #6b4e71;
-        }
-
-        .chapter-container p {
-            font-size: 1rem;
-            color: #333;
-        }
-
-        .show-chapter {
-            display: inline-block;
+        button {
             margin-top: 20px;
             font-size: 1.2rem;
-            color: #fff;
+            color: white;
             background: #6b4e71;
             border: none;
             padding: 10px 20px;
@@ -96,19 +97,8 @@
             transition: background 0.3s;
         }
 
-        .show-chapter:hover {
+        button:hover {
             background: #5a3d5a;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
         }
 
         @media (max-width: 768px) {
@@ -119,22 +109,29 @@
             p {
                 font-size: 1.2rem;
             }
+
+            strong {
+                font-size: 1.4rem;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="verse-container">
-        <h1>Daily Meditation</h1>
-        <p>
-            <strong id="verseReference">Loading verse...</strong><br>
-            <span id="verseText">Please wait...</span>
-        </p>
-        <button class="show-chapter" id="showChapterBtn">Read Full Chapter</button>
-    </div>
+    <div class="container">
+        <div class="verse-container">
+            <h1>Daily Meditation</h1>
+            <p>
+                <strong id="verseReference">Loading verse...</strong><br>
+                <span id="verseText">Please wait...</span>
+            </p>
+            <button id="toggleChapterBtn">Read Full Chapter</button>
+        </div>
 
-    <div class="chapter-container" id="chapterContainer">
-        <h2 id="chapterTitle">Full Chapter</h2>
-        <p id="chapterText">Loading full chapter...</p>
+        <div class="chapter-container">
+            <h1 id="chapterTitle">Full Chapter</h1>
+            <p id="chapterText">Loading full chapter...</p>
+            <button id="toggleVerseBtn">Back to Verse</button>
+        </div>
     </div>
 
     <script>
@@ -143,32 +140,47 @@
             const day = date.getDate(); // Day of the month
             const chapter = 35; // Static chapter (Exodus 35 for this example)
 
-            // Fetch the daily verse
-            const verseResponse = await fetch(`https://bible-api.com/Exodus%20${chapter}:${day}?translation=kjv`);
-            const verseData = await verseResponse.json();
+            try {
+                // Fetch the daily verse
+                const verseResponse = await fetch(`https://bible-api.com/Exodus%20${chapter}:${day}?translation=kjv`);
+                const verseData = await verseResponse.json();
 
-            // Display the daily verse
-            const verseReference = verseData.reference;
-            const verseText = verseData.text.replace(
-                /(wisdom|understanding|knowledge)/gi,
-                match => `<span class="highlight">${match}</span>`
-            );
-            document.getElementById('verseReference').textContent = verseReference;
-            document.getElementById('verseText').innerHTML = verseText;
+                const verseReference = verseData.reference;
+                const verseText = verseData.text.replace(
+                    /(wisdom|understanding|knowledge)/gi,
+                    match => `<span class="highlight">${match}</span>`
+                );
 
-            // Prepare to fetch the full chapter
-            const chapterResponse = await fetch(`https://bible-api.com/Exodus%20${chapter}?translation=kjv`);
-            const chapterData = await chapterResponse.json();
+                document.getElementById('verseReference').textContent = verseReference;
+                document.getElementById('verseText').innerHTML = verseText;
 
-            // Display the full chapter
-            document.getElementById('chapterTitle').textContent = chapterData.reference;
-            document.getElementById('chapterText').textContent = chapterData.text;
+                // Fetch the full chapter
+                const chapterResponse = await fetch(`https://bible-api.com/Exodus%20${chapter}?translation=kjv`);
+                const chapterData = await chapterResponse.json();
+
+                document.getElementById('chapterTitle').textContent = chapterData.reference;
+                document.getElementById('chapterText').textContent = chapterData.text;
+            } catch (error) {
+                console.error('Error fetching verse or chapter:', error);
+                document.getElementById('verseReference').textContent = 'Error loading verse';
+                document.getElementById('verseText').textContent = 'Please try again later.';
+            }
         }
 
-        // Show or hide the full chapter
-        document.getElementById('showChapterBtn').addEventListener('click', () => {
-            const chapterContainer = document.getElementById('chapterContainer');
-            chapterContainer.style.display = chapterContainer.style.display === 'block' ? 'none' : 'block';
+        // Slide functionality
+        const verseContainer = document.querySelector('.verse-container');
+        const chapterContainer = document.querySelector('.chapter-container');
+        const toggleChapterBtn = document.getElementById('toggleChapterBtn');
+        const toggleVerseBtn = document.getElementById('toggleVerseBtn');
+
+        toggleChapterBtn.addEventListener('click', () => {
+            verseContainer.classList.add('hidden');
+            chapterContainer.classList.remove('hidden');
+        });
+
+        toggleVerseBtn.addEventListener('click', () => {
+            chapterContainer.classList.add('hidden');
+            verseContainer.classList.remove('hidden');
         });
 
         // Fetch verse and chapter on load
