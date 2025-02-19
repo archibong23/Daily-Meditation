@@ -16,82 +16,50 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            overflow: hidden;
         }
 
         /* Container Styles */
         .container {
             width: 100%;
             max-width: 800px;
-            height: 100%;
-            position: relative;
+            padding: 20px;
+            text-align: center;
         }
 
-        .verse-container, .chapter-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+        .content-box {
             background: white;
-            padding: 40px;
+            padding: 30px;
             border-radius: 15px;
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            overflow: hidden;
-            transition: transform 0.6s ease-in-out;
+            display: none; /* Initially hidden */
         }
 
-        .verse-container {
-            z-index: 2;
-            transform: translateY(0);
-        }
-
-        .chapter-container {
-            z-index: 1;
-            transform: translateY(100%);
-        }
-
-        .hidden {
-            transform: translateY(-100%);
+        .active {
+            display: block; /* Show when active */
         }
 
         h1 {
             color: #6b4e71;
             text-transform: uppercase;
             font-weight: bold;
-            font-size: 2.5rem;
+            font-size: 2rem;
             margin-bottom: 20px;
         }
 
         p {
-            font-size: 1.5rem;
+            font-size: 1.2rem;
             color: #333;
-            line-height: 1.8;
-            margin: 0;
-        }
-
-        strong {
-            font-size: 1.6rem;
-            color: #6b4e71;
-        }
-
-        .highlight {
-            font-weight: bold;
-            color: #d9534f;
+            line-height: 1.6;
+            margin: 10px 0;
         }
 
         button {
             margin-top: 20px;
-            font-size: 1.2rem;
+            font-size: 1rem;
             color: white;
             background: #6b4e71;
             border: none;
-            padding: 10px 20px;
+            padding: 10px 15px;
             border-radius: 5px;
             cursor: pointer;
             transition: background 0.3s;
@@ -100,68 +68,43 @@
         button:hover {
             background: #5a3d5a;
         }
-
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 2rem;
-            }
-
-            p {
-                font-size: 1.2rem;
-            }
-
-            strong {
-                font-size: 1.4rem;
-            }
-        }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="verse-container">
+        <!-- Verse Container -->
+        <div class="content-box active" id="verseContainer">
             <h1>Daily Meditation</h1>
+            <p><strong>Psalms 70:1-5</strong></p>
             <p>
-                <strong id="verseReference">Psalms 70:1-5</strong><br>
-                <span id="verseText">
-                    Make haste, O God, to deliver me; make haste to help me, O LORD.<br>
-                    Let them be ashamed and confounded that seek after my soul: let them be turned backward, and put to confusion, that desire my hurt.<br>
-                    Let them be turned back for a reward of their shame that say, Aha, aha.<br>
-                    Let all those that seek thee rejoice and be glad in thee: and let such as love thy salvation say continually, Let God be magnified.<br>
-                    But I am poor and needy: make haste unto me, O God: thou art my help and my deliverer; O LORD, make no tarrying.
-                </span>
-            </p>
-            <button id="toggleChapterBtn">Read Full Chapter</button>
-        </div>
-
-        <div class="chapter-container">
-            <h1 id="chapterTitle">Psalms 70</h1>
-            <p id="chapterText">
                 Make haste, O God, to deliver me; make haste to help me, O LORD.<br>
                 Let them be ashamed and confounded that seek after my soul: let them be turned backward, and put to confusion, that desire my hurt.<br>
                 Let them be turned back for a reward of their shame that say, Aha, aha.<br>
                 Let all those that seek thee rejoice and be glad in thee: and let such as love thy salvation say continually, Let God be magnified.<br>
                 But I am poor and needy: make haste unto me, O God: thou art my help and my deliverer; O LORD, make no tarrying.
             </p>
-            <button id="toggleVerseBtn">Back to Verse</button>
+            <button onclick="toggleContent()">Read Full Chapter</button>
+        </div>
+
+        <!-- Full Chapter Container -->
+        <div class="content-box" id="chapterContainer">
+            <h1>Psalms 70</h1>
+            <p>
+                Make haste, O God, to deliver me; make haste to help me, O LORD.<br>
+                Let them be ashamed and confounded that seek after my soul: let them be turned backward, and put to confusion, that desire my hurt.<br>
+                Let them be turned back for a reward of their shame that say, Aha, aha.<br>
+                Let all those that seek thee rejoice and be glad in thee: and let such as love thy salvation say continually, Let God be magnified.<br>
+                But I am poor and needy: make haste unto me, O God: thou art my help and my deliverer; O LORD, make no tarrying.
+            </p>
+            <button onclick="toggleContent()">Back to Verse</button>
         </div>
     </div>
 
     <script>
-        // Slide functionality
-        const verseContainer = document.querySelector('.verse-container');
-        const chapterContainer = document.querySelector('.chapter-container');
-        const toggleChapterBtn = document.getElementById('toggleChapterBtn');
-        const toggleVerseBtn = document.getElementById('toggleVerseBtn');
-
-        toggleChapterBtn.addEventListener('click', () => {
-            verseContainer.classList.add('hidden');
-            chapterContainer.classList.remove('hidden');
-        });
-
-        toggleVerseBtn.addEventListener('click', () => {
-            chapterContainer.classList.add('hidden');
-            verseContainer.classList.remove('hidden');
-        });
+        function toggleContent() {
+            document.getElementById('verseContainer').classList.toggle('active');
+            document.getElementById('chapterContainer').classList.toggle('active');
+        }
     </script>
 </body>
 </html>
